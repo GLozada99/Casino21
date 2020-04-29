@@ -3,16 +3,42 @@ package logic;
 import java.util.ArrayList;
 
 public class Group {
-	private ArrayList<Card> cards;
-	private int value;
-	private int groups;
+	private Player player;
+	private ArrayList<Set> mySets;
+	private int number;
 	
-	public Group(ArrayList<Card> cards, int value, int groups) {
+	
+	public Group(Player player, ArrayList<Set> sets, int number) {
 		super();
-		this.cards = cards;
-		this.value = value;
-		this.groups = groups;
+		this.setPlayer(player);
+		this.setMySets(sets);
+		this.number = number;
 	}
+	
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+
+	public ArrayList<Set> getMySets() {
+		return mySets;
+	}
+
+	public void setMySets(ArrayList<Set> mySets) {
+		this.mySets = mySets;
+	}
+	
 	
 	
 	

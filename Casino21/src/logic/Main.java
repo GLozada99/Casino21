@@ -3,15 +3,10 @@ package logic;
 public class Main {
 
 	public static void main(String[] args) {
-		Game g1 = new Game("Gus");
+
 		
 		
-	/*	for (Card card : g1.getDeck()) {
-			System.out.println(card.getValue()+" "+card.getSuit());
-		}*/
-		
-		g1.deal();
-		g1.deal();
+		/*g1.deal();
 		g1.deal();
 		g1.deal();
 		g1.deal();

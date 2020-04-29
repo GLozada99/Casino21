@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public class Table {
 	private ArrayList<Card> cards;
-	private ArrayList<ArrayList<Card>> groups;
+	private ArrayList<Group> groups;
 	
 	public Table() {
 		super();
 		this.cards = new ArrayList<Card>();
-		this.groups = new ArrayList<ArrayList<Card>>();
+		this.groups = new ArrayList<Group>();
 	}
 
 	public ArrayList<Card> getCards() {
@@ -20,15 +20,18 @@ public class Table {
 		this.cards = cards;
 	}
 
-	public ArrayList<ArrayList<Card>> getGroups() {
+	public ArrayList<Group> getGroups() {
 		return groups;
 	}
 
-	public void setGroups(ArrayList<ArrayList<Card>> groups) {
+	public void setGroups(ArrayList<Group> groups) {
 		this.groups = groups;
 	}
 	public void addCard(Card card) {
 		cards.add(card);
+	}
+	public void removeCard(Card card) {
+		cards.remove(cards.indexOf(card));
 	}
 	
 	

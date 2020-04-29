@@ -48,10 +48,8 @@ public class Player {
 		this.heap = heap;
 	}
 	
-	public Card playCard(Card card) {
-		Card aux = null;
-		aux = hand.remove(hand.indexOf(card));
-		return aux;
+	public void playCard(Card card) {
+		hand.remove(hand.indexOf(card));
 	}
 	
 	public void addCard(Card card) {
