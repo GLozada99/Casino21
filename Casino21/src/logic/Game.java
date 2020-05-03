@@ -20,7 +20,7 @@ public class Game {
 		this.table = new Table();
 	}
 
-	public Game getInstance() {
+	public static Game getInstance() {
 		if(game==null) {
 			game = new Game();
 		}
@@ -63,24 +63,29 @@ public class Game {
 	public ArrayList<Card> createDeck(){
 		ArrayList<Card> newDeck = new ArrayList<Card>();
 		String suit = "";
+		String addressName = "";
 		Card aux = null;
 		for (int i = 0; i < 4; i++) {
 			switch (i) {
 			case 0:
 				suit="Spades";
+				addressName="S.jpg"; 
 				break;
 			case 1:
 				suit="Hearts";
+				addressName="H.jpg";
 				break;
 			case 2:
 				suit="Clubs";
+				addressName="C.jpg";
 				break;
 			case 3:
 				suit="Diamonds";
+				addressName="D.jpg";
 				break;
 			}
 			for (int j = 1; j < 14; j++) {
-				aux = new Card(j, suit);
+				aux = new Card(j, suit, Integer.valueOf(j).toString()+addressName);
 				newDeck.add(aux);
 			}
 		}
@@ -102,6 +107,7 @@ public class Game {
 			PC.addCard(takeCard());
 		}
 	}
+	
 	public void onTable() {
 		for (int i = 0; i < 4; i++) {
 			table.addCard(takeCard());

@@ -23,5 +23,12 @@ public class Set {
 		this.number = number;
 	}
 	
+	public float getSetValue() {
+		float value = 0;
+		for (Card card : cards) {
+			value += card.getValue();
+		}
+		return value;
+	}
 	
 }

@@ -4,14 +4,16 @@ public class Card {
 	private int number;
 	private String suit;
 	private float value;
+	private String addressName;
 	
 	
 
-	public Card(int number, String suit) {
+	public Card(int number, String suit, String addressName) {
 		super();
 		//suit can be: Spades, Clubs, Diamonds or Hearts
 		this.number = number;
 		this.suit = suit;
+		this.setAddressName(addressName);
 		if(this.number==1) {
 			this.value = 1;
 		}
@@ -27,11 +29,9 @@ public class Card {
 			this.value = 0;
 		}
 		if(this.suit.equalsIgnoreCase("Spades")) {
-			this.value = this.value + (float) 0.15;
+			this.value += (float) 0.05;
 		}
-		
-
-		
+		this.value += (float) 0.01;
 	}
 	
 	public float getValue() {
@@ -53,6 +53,14 @@ public class Card {
 
 	public void setNumber(int number) {
 		this.number = number;
+	}
+
+	public String getAddressName() {
+		return addressName;
+	}
+
+	public void setAddressName(String addressName) {
+		this.addressName = addressName;
 	}
 	
 

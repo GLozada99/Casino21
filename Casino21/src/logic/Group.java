@@ -39,8 +39,11 @@ public class Group {
 		this.mySets = mySets;
 	}
 	
-	
-	
-	
-
+	public float groupValue() {
+		float value = 0;
+		for (Set set : mySets) {
+			value += set.getSetValue();
+		}
+		return value;
+	}
 }
