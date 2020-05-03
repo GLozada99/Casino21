@@ -161,32 +161,50 @@ public class GameWindow extends JFrame {
 		Game.getInstance().createDeck();
 		Game.getInstance().shuffleDeck();
 		Game.getInstance().deal();
+
+	}
+	
+	public void setCardInPanel(boolean choice, int i) {
+		//if choice is true, it means that we will show card for player, else for PC
+		if (choice) {
+			((JPanelBackground)playerPanels.get(i)).setBackground("Images/"+ Game.getInstance().getPlayer().getHand().get(i).getAddressName());
+		}else {
+			((JPanelBackground)PCPanels.get(i)).setBackground("Images/CardBack4.jpg");	
+			//((JPanelBackground)PCPanels.get(i)).setBackground("Images/"+ Game.getInstance().getPC().getHand().get(i).getAddressName());
+			
+		}
 		
 	}
-
+	
 	public void dealCards(int step) throws IOException, InterruptedException {
-		Timer timerPlayer = new Timer(step, new ActionListener() {
-			int i = 0;
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				((JPanelBackground)playerPanels.get(i)).setBackground("Images/"+ Game.getInstance().getPlayer().getHand().get(i).getAddressName());
-				playerPanels.get(i).setVisible(true);
-				i++;
-			}
-		});
+		TimerStop timerPlayer = new TimerStop();;
+		TimerStop timerPC = new TimerStop();;
 		
-		Timer timerPC = new Timer(step, new ActionListener() {
-			int i = 0;
-			@Override
+		ActionListener dealPlayer = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				((JPanelBackground)PCPanels.get(i)).setBackground(("Images/CardBack4.jpg"));
-				PCPanels.get(i).setVisible(true);
-				i++;
+				setCardInPanel(true, timerPlayer.getRepetitions());
+				playerPanels.get(timerPlayer.getRepetitions()).setVisible(true);
+				timerPlayer.incrementRepetitions();
+				if(timerPlayer.getRepetitions()==4) {
+					timerPlayer.stopTimer();
+				}
 			}
-		});
-		timerPlayer.start();
+		};
+		ActionListener dealPC = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setCardInPanel(false, timerPC.getRepetitions());
+				PCPanels.get(timerPC.getRepetitions()).setVisible(true);
+				timerPC.incrementRepetitions();
+				if(timerPC.getRepetitions()==4) {
+					timerPC.stopTimer();
+				}
+			}
+		};
+		timerPlayer.setTimer(new Timer(step, dealPlayer));
+		timerPC.setTimer(new Timer(step, dealPC));
+		timerPlayer.startTimer();
 		Thread.sleep(step/2);
-		timerPC.start();
+		timerPC.startTimer();
 	}
 
 	public void offPanelCards() {
