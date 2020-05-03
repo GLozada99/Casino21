@@ -118,7 +118,7 @@ public class Game {
 		Card aux = null;
 		boolean found = false;
 		int i = 0;
-		while(i < deck.size()&&!found) {
+		while(i < originalDeck.size()&&!found) {
 			if(originalDeck.get(i).getNumber()==number && originalDeck.get(i).getSuit().equalsIgnoreCase(suit)) {
 				found = true;
 				aux = originalDeck.get(i);
@@ -214,6 +214,21 @@ public class Game {
 
 	public void setOriginalDeck(ArrayList<Card> originalDeck) {
 		this.originalDeck = originalDeck;
+	}
+	
+	public Card cardByAddress(String address) {
+		Card aux = null;
+		String auxAddress = address.split("/")[1];
+		boolean found = false;
+		int i = 0;
+		while(i < originalDeck.size()&&!found) {
+			if(originalDeck.get(i).getAddressName().equalsIgnoreCase(auxAddress)) {
+				found = true;
+				aux = originalDeck.get(i);
+			}
+			i++;
+		}
+		return aux;
 	}
 
 

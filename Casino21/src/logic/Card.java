@@ -1,8 +1,8 @@
 package logic;
 
 public class Card {
-	private int number;
-	private String suit;
+	private final int number;
+	private final String suit;
 	private float value;
 	private String addressName;
 	
@@ -43,16 +43,9 @@ public class Card {
 	public String getSuit() {
 		return suit;
 	}
-	public void setSuit(String suit) {
-		this.suit = suit;
-	}
 
 	public int getNumber() {
 		return number;
-	}
-
-	public void setNumber(int number) {
-		this.number = number;
 	}
 
 	public String getAddressName() {
@@ -63,6 +56,9 @@ public class Card {
 		this.addressName = addressName;
 	}
 	
+	public String toString() {
+		return number+" "+value;
+	}
 
 
 

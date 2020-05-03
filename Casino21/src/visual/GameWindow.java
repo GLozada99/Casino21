@@ -6,14 +6,15 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.imageio.ImageIO;
-import javax.swing.GroupLayout;
+
 import javax.swing.ImageIcon;
-import javax.swing.GroupLayout.Alignment;
+
 import javax.swing.Icon;
 import javax.swing.border.SoftBevelBorder;
 
@@ -23,18 +24,25 @@ import logic.Player;
 
 import javax.swing.border.BevelBorder;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.Timer;
 import javax.swing.JLabel;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JButton;
 
 public class GameWindow extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private Dimension panelSize = new Dimension(90, 137);
-	private JLabel lblCard1;
-	private JLabel lblCard2;
-	private JLabel lblCard3;
-	private JLabel lblCard4;
-	public ArrayList<JLabel> playerLabels = new ArrayList<JLabel>();
-	public ArrayList<JLabel> PCLabels = new ArrayList<JLabel>();
+	public ArrayList<JPanel> playerPanels = new ArrayList<JPanel>();
+	public ArrayList<JPanel> PCPanels = new ArrayList<JPanel>();
+
 
 	/**
 	 * Launch the application.
@@ -55,8 +63,9 @@ public class GameWindow extends JFrame {
 	/**
 	 * Create the frame.
 	 * @throws IOException 
+	 * @throws InterruptedException 
 	 */
-	public GameWindow() throws IOException {
+	public GameWindow() throws IOException, InterruptedException {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1900, 1040);
 		setLocationRelativeTo(null);
@@ -67,110 +76,125 @@ public class GameWindow extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		JPanel P1 = new JPanel();
-		P1.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		JPanel P1 = new JPanelBackground();
+		P1.setBorder(null);
 		P1.setBounds(714, 782, 95, 145);
 		contentPane.add(P1);
 		P1.setLayout(new BorderLayout(0, 0));
 
-		lblCard1 = new JLabel();
-		P1.add(lblCard1, BorderLayout.NORTH);
-
-		JPanel P2 = new JPanel();
-		P2.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		JPanel P2 = new JPanelBackground();
+		P2.setBorder(null);
 		P2.setBounds(835, 782, 95, 145);
 		contentPane.add(P2);
 		P2.setLayout(new BorderLayout(0, 0));
 
-		lblCard2 = new JLabel();
-		P2.add(lblCard2, BorderLayout.NORTH);
-
-		JPanel P3 = new JPanel();
-		P3.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		JPanel P3 = new JPanelBackground();
+		P3.setBorder(null);
 		P3.setBounds(953, 782, 95, 145);
 		contentPane.add(P3);
 		P3.setLayout(new BorderLayout(0, 0));
 
-		lblCard3 = new JLabel();
-		P3.add(lblCard3, BorderLayout.NORTH);
-
-		JPanel P4 = new JPanel();
-		P4.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		JPanel P4 = new JPanelBackground();
+		P4.setBorder(null);
 		P4.setBounds(1077, 782, 95, 145);
 		contentPane.add(P4);
 		P4.setLayout(new BorderLayout(0, 0));
 
-		lblCard4 = new JLabel();
-		P4.add(lblCard4, BorderLayout.NORTH);
 
-		JPanel PC1 = new JPanel();
+
+		JPanel PC1 = new JPanelBackground();
+
 		PC1.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
 		PC1.setBounds(720, 52, 99, 132);
 		contentPane.add(PC1);
 		PC1.setLayout(new BorderLayout(0, 0));
 
-		JLabel lblPC1 = new JLabel("");
-		PC1.add(lblPC1, BorderLayout.NORTH);
-
-		JPanel PC2 = new JPanel();
+		JPanel PC2 = new JPanelBackground();
 		PC2.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
 		PC2.setBounds(837, 52, 99, 132);
 		contentPane.add(PC2);
 		PC2.setLayout(new BorderLayout(0, 0));
 
-		JLabel lblPC2 = new JLabel("");
-		PC2.add(lblPC2, BorderLayout.NORTH);
-
-		JPanel PC3 = new JPanel();
+		JPanel PC3 = new JPanelBackground();
 		PC3.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
 		PC3.setBounds(954, 52, 99, 132);
 		contentPane.add(PC3);
 		PC3.setLayout(new BorderLayout(0, 0));
 
-		JLabel lblPC3 = new JLabel("");
-		PC3.add(lblPC3, BorderLayout.NORTH);
-
-		JPanel PC4 = new JPanel();
+		JPanel PC4 = new JPanelBackground();
 		PC4.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
 		PC4.setBounds(1071, 52, 99, 132);
 		contentPane.add(PC4);
 		PC4.setLayout(new BorderLayout(0, 0));
 
-		JLabel lblPC4 = new JLabel("");
-		PC4.add(lblPC4, BorderLayout.NORTH);
 		setResizable(false);
 
-		playerLabels.add(lblCard1);
-		playerLabels.add(lblCard2);
-		playerLabels.add(lblCard3);
-		playerLabels.add(lblCard4);
-		PCLabels.add(lblPC1);
-		PCLabels.add(lblPC2);
-		PCLabels.add(lblPC3);
-		PCLabels.add(lblPC4);
+		playerPanels.add(P1);
+		playerPanels.add(P2);
+		playerPanels.add(P3);
+		playerPanels.add(P4);
+		PCPanels.add(PC1);
+		PCPanels.add(PC2);
+		PCPanels.add(PC3);
+		PCPanels.add(PC4);
+
+		JButton btnDeal = new JButton("Deal");
+		btnDeal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				try {
+					dealCards(800);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+
+
+		btnDeal.setBounds(1785, 13, 97, 25);
+		contentPane.add(btnDeal);
+		offPanelCards();
 		Game.getInstance().createDeck();
 		Game.getInstance().shuffleDeck();
 		Game.getInstance().deal();
-		showPlayerDealtCards();
-		showPCBackCards();
+		
 	}
 
-	public void showPlayerDealtCards() throws IOException {
-		Player auxPl = Game.getInstance().getPlayer();
-		int i = 0;
-		for (Card card : auxPl.getHand()) {
-			playerLabels.get(i).setIcon(iconFromAddress(card.getAddressName()));
-			i++;
+	public void dealCards(int step) throws IOException, InterruptedException {
+		Timer timerPlayer = new Timer(step, new ActionListener() {
+			int i = 0;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				((JPanelBackground)playerPanels.get(i)).setBackground("Images/"+ Game.getInstance().getPlayer().getHand().get(i).getAddressName());
+				playerPanels.get(i).setVisible(true);
+				i++;
+			}
+		});
+		
+		Timer timerPC = new Timer(step, new ActionListener() {
+			int i = 0;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				((JPanelBackground)PCPanels.get(i)).setBackground(("Images/CardBack4.jpg"));
+				PCPanels.get(i).setVisible(true);
+				i++;
+			}
+		});
+		timerPlayer.start();
+		Thread.sleep(step/2);
+		timerPC.start();
+	}
+
+	public void offPanelCards() {
+		for (int i = 0; i < 4; i++) {
+			playerPanels.get(i).setVisible(false);
+			PCPanels.get(i).setVisible(false);
 		}
 	}
-
-	public void showPCBackCards() throws IOException {
-		Player auxPC = Game.getInstance().getPC();
-		for (int i = 0; i < auxPC.getHand().size(); i++) {
-			PCLabels.get(i).setIcon(iconFromAddress("CardBack3.jpg"));
-		}
-	}
-
 
 
 
