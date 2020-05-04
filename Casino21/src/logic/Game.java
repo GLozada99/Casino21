@@ -102,16 +102,26 @@ public class Game {
 	}
 
 	public void deal() {
-		for (int i = 0; i < 4; i++) {
-			player.addCard(takeCard());
-			PC.addCard(takeCard());
+		try {
+			for (int i = 0; i < 4; i++) {
+				player.addCard(takeCard());
+				PC.addCard(takeCard());
+			}
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("There are no more elements on the array");
 		}
+
 	}
-	
+
 	public void onTable() {
-		for (int i = 0; i < 4; i++) {
-			table.addCard(takeCard());
+		try {
+			for (int i = 0; i < 4; i++) {
+				table.addCard(takeCard());
+			}
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("There are no more elements on the array");
 		}
+
 	}
 
 	public Card cardByNumberAndSuit(int number, String suit) {
@@ -147,6 +157,25 @@ public class Game {
 		}
 		return result;
 	}
+	
+	public boolean createGroup(Player player, ArrayList<Card> cards, int number) {
+		boolean result = false;
+		int value = 0;
+		for (Card card : cards) {
+			value += card.getNumber(); 
+		}
+		if(value == number) {
+			result = true;
+			Set auxS = new Set((ArrayList<Card>) cards.clone(), number);
+			table.getCards().removeAll(cards);
+			ArrayList<Set> sets = new ArrayList<Set>();
+			sets.add(auxS);
+			Group auxG = new Group(player, sets, number);
+			table.getGroups().add(auxG);
+		}
+		return result;
+	}
+	
 	public boolean createGroup(Player player, Card cardP, int number) {
 		boolean result = false;
 		int value = cardP.getNumber();
@@ -163,7 +192,7 @@ public class Game {
 		}
 		return result;
 	}
-	
+
 	public boolean addSetToGroup(ArrayList<Card> cards, int number, Group group) {
 		boolean result = false;
 		if(group.getMySets().size()==1) {
@@ -215,7 +244,7 @@ public class Game {
 	public void setOriginalDeck(ArrayList<Card> originalDeck) {
 		this.originalDeck = originalDeck;
 	}
-	
+
 	public Card cardByAddress(String address) {
 		Card aux = null;
 		String auxAddress = address.split("/")[1];

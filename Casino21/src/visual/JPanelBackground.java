@@ -20,6 +20,7 @@ public class JPanelBackground extends JPanel {
 	 
 	// Atributo que guardara la imagen de Background que le pasemos.
 	private Image background;
+	private String backgroundAddress = null;
  
 	// Metodo que es llamado automaticamente por la maquina virtual Java cada vez que repinta
 	public void paintComponent(Graphics g) {
@@ -43,7 +44,16 @@ public class JPanelBackground extends JPanel {
 		// Construimos la imagen y se la asignamos al atributo background.
 		this.setOpaque(false);
 		this.background = new ImageIcon(imagePath).getImage();
+		this.backgroundAddress = imagePath;
 		repaint();
+	}
+	
+	public String getAddress(){
+		String address = "No Address";
+		if(backgroundAddress != null) {
+			address = backgroundAddress;
+		}
+		return address;
 	}
  
 }
