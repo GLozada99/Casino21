@@ -6,13 +6,15 @@ public class Group {
 	private Player player;
 	private ArrayList<Set> mySets;
 	private int number;
+	private int turnNumber;
 	
 	
-	public Group(Player player, ArrayList<Set> sets, int number) {
+	public Group(Player player, ArrayList<Set> sets, int number, int turnNumber) {
 		super();
 		this.setPlayer(player);
 		this.setMySets(sets);
 		this.number = number;
+		this.setTurnNumber(turnNumber);
 	}
 	
 	public int getNumber() {
@@ -45,5 +47,13 @@ public class Group {
 			value += set.getSetValue();
 		}
 		return value;
+	}
+
+	public int getTurnNumber() {
+		return turnNumber;
+	}
+
+	public void setTurnNumber(int turnNumber) {
+		this.turnNumber = turnNumber;
 	}
 }

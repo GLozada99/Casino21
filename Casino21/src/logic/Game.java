@@ -138,7 +138,7 @@ public class Game {
 		return aux;
 	}
 
-	public boolean createGroup(Player player, Card cardP, ArrayList<Card> cards, int number) {
+	public boolean createGroup(Player player, Card cardP, ArrayList<Card> cards, int number, int turnNumber) {
 		boolean result = false;
 		cards.add(cardP);
 		int value = 0;
@@ -151,44 +151,28 @@ public class Game {
 			table.getCards().removeAll(cards);
 			ArrayList<Set> sets = new ArrayList<Set>();
 			sets.add(auxS);
-			Group auxG = new Group(player, sets, number);
+			Group auxG = new Group(player, sets, number, turnNumber);
 			table.getGroups().add(auxG);
 			player.playCard(cardP);
 		}
 		return result;
 	}
 	
-	public boolean createGroup(Player player, ArrayList<Card> cards, int number) {
+
+	public boolean createGroup(Player player, ArrayList<Card> cards, int number, int turnNumber) {
 		boolean result = false;
 		int value = 0;
 		for (Card card : cards) {
 			value += card.getNumber(); 
 		}
-		if(value == number) {
+		if(value == number || (value==14 && number==1)) {
 			result = true;
 			Set auxS = new Set((ArrayList<Card>) cards.clone(), number);
 			table.getCards().removeAll(cards);
 			ArrayList<Set> sets = new ArrayList<Set>();
 			sets.add(auxS);
-			Group auxG = new Group(player, sets, number);
+			Group auxG = new Group(player, (ArrayList<Set>) sets.clone(), number, turnNumber);
 			table.getGroups().add(auxG);
-		}
-		return result;
-	}
-	
-	public boolean createGroup(Player player, Card cardP, int number) {
-		boolean result = false;
-		int value = cardP.getNumber();
-		if(value == 1 && number == 14) {
-			result = true;
-			ArrayList<Card> cards = new ArrayList<Card>();
-			cards.add(cardP);
-			Set auxS = new Set(cards, number);
-			ArrayList<Set> sets = new ArrayList<Set>();
-			sets.add(auxS);
-			Group auxG = new Group(player, sets, number);
-			table.getGroups().add(auxG);
-			player.playCard(cardP);
 		}
 		return result;
 	}
@@ -221,6 +205,10 @@ public class Game {
 		}
 		return result;
 	}
+	public void playCard(Player player, Card cardP) {
+		player.playCard(cardP);
+		table.addCard(cardP);
+	}
 
 	public boolean takeGroup(Player player, Card card, Group group) {
 		boolean result=false;
@@ -232,6 +220,7 @@ public class Game {
 					player.getHeap().add(card2);	
 				}
 			}
+			table.getGroups().remove(table.getGroups().indexOf(group));
 			result = true;
 		}
 		return result;

@@ -22,4 +22,7 @@ public class TimerStop {
 	public void startTimer() {
 		timer.start();
 	}
+	public void setStep(int step) {
+		timer.setDelay(step);
+	}
 }
