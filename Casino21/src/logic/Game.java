@@ -15,8 +15,8 @@ public class Game {
 		super();
 		this.deck = createDeck();
 		this.setOriginalDeck((ArrayList<Card>) deck.clone());
-		this.player = new Player("Player");
-		this.PC = new Player("PC");
+		this.player = new HumanPlayer("Human");
+		this.PC = new PCPlayer();
 		this.table = new Table();
 	}
 
@@ -176,6 +176,29 @@ public class Game {
 		}
 		return result;
 	}
+	
+	public boolean changeGroup(Player player, Group group, Card card, int turnNumber) {
+		boolean result = false;
+		int finalNumber = card.getNumber() + group.getNumber();
+		player.playCard(card);
+		for (Card cardLeft : player.getHand()) {
+			if(cardLeft.getNumber()==finalNumber || (finalNumber == 14 && cardLeft.getNumber()==1)) {
+				result = true;
+				break;
+			}
+		}
+		if(result) {
+			group.getMySets().get(0).getCards().add(card);
+			group.setNumber(finalNumber);
+			group.setTurnNumber(turnNumber);
+			group.setPlayer(player);
+		}else {
+			player.addCard(card);
+		}
+		
+		
+		return result;
+	}
 
 	public boolean addSetToGroup(ArrayList<Card> cards, int number, Group group) {
 		boolean result = false;
@@ -248,6 +271,8 @@ public class Game {
 		}
 		return aux;
 	}
+	
+	
 
 
 

@@ -57,6 +57,10 @@ public class JPanelBackground extends JPanel {
 		repaint();
 	}
 	
+	public void setGroupAddress(String address) {
+		this.backgroundAddress = address;
+	}
+	
 	public String getAddress(){
 		String address = "No Address";
 		if(backgroundAddress != null) {

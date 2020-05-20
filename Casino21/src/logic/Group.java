@@ -2,11 +2,14 @@ package logic;
 
 import java.util.ArrayList;
 
+import javax.swing.JPanel;
+
 public class Group {
 	private Player player;
 	private ArrayList<Set> mySets;
 	private int number;
 	private int turnNumber;
+	private ArrayList<JPanel> groupPanels;
 	
 	
 	public Group(Player player, ArrayList<Set> sets, int number, int turnNumber) {
@@ -15,6 +18,7 @@ public class Group {
 		this.setMySets(sets);
 		this.number = number;
 		this.setTurnNumber(turnNumber);
+		this.setGroupPanels(new ArrayList<JPanel>());
 	}
 	
 	public int getNumber() {
@@ -56,4 +60,13 @@ public class Group {
 	public void setTurnNumber(int turnNumber) {
 		this.turnNumber = turnNumber;
 	}
+
+	public ArrayList<JPanel> getGroupPanels() {
+		return groupPanels;
+	}
+
+	public void setGroupPanels(ArrayList<JPanel> groupPanels) {
+		this.groupPanels = groupPanels;
+	}
+	
 }

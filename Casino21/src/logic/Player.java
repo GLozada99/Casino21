@@ -2,26 +2,17 @@ package logic;
 
 import java.util.ArrayList;
 
-public class Player {
-	private String name;
-	private ArrayList<Card> hand;
-	private int points;
-	private ArrayList<Card> heap;
+public abstract class Player {
 	
-	public Player(String name) {
+	protected ArrayList<Card> hand;
+	protected int points;
+	protected ArrayList<Card> heap;
+	
+	public Player() {
 		super();
-		this.name = name;
 		this.hand = new ArrayList<Card>();
 		this.points = 0;
 		this.heap = new ArrayList<Card>();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public ArrayList<Card> getHand() {
@@ -55,6 +46,8 @@ public class Player {
 	public void addCard(Card card) {
 		hand.add(card);
 	}
+	public abstract String getName();
+	
 	
 	
 	

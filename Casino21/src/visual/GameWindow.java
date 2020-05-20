@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -22,6 +23,8 @@ import javax.swing.border.SoftBevelBorder;
 import logic.Card;
 import logic.Game;
 import logic.Group;
+import logic.HumanPlayer;
+import logic.PCPlayer;
 import logic.Player;
 import logic.Set;
 import visual.Bounds;
@@ -44,6 +47,7 @@ import javax.swing.JTextField;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Window;
 
 import javax.swing.SwingConstants;
 
@@ -81,9 +85,12 @@ public class GameWindow extends JFrame {
 	private int dealCount = 0;
 	private JLabel lblCount;
 	private ArrayList<Card> setToCreate = new ArrayList<Card>();
+	private boolean couple = false;
 	private Player currentPlayer;
 	private int currentTurnNumber = 0;
 	private Card playerCard = null;
+	private boolean singleGroupSelected = false;
+	private Group groupToAdd = null;
 
 
 
@@ -157,11 +164,41 @@ public class GameWindow extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				lblCount.setText("0");
 				setToCreate.clear();
+				lblCount.setFont(new Font("Tahoma", Font.BOLD, 28));
 				playerCard = null;
+				groupToAdd = null;
+				couple = false;
 			}
 		});
 		btnReset.setBounds(1785, 51, 97, 25);
 		contentPane.add(btnReset);
+		
+		JButton btnEndTurn = new JButton("End Turn");
+		btnEndTurn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(currentPlayer instanceof HumanPlayer) {
+					currentPlayer = Game.getInstance().getPC();
+					Set set = ((PCPlayer)Game.getInstance().getPC()).evaluateBestPlay(Game.getInstance().getTable());
+					
+					if(set!=null) {
+						playerCard = set.getCards().get(0);
+						JPanel tableCard = tablePanelByAddress("Images/"+set.getCards().get(1).getAddressName());
+						pSelectTablePanels(tableCard);
+					}else {
+						playerCard = currentPlayer.getHand().get(0);
+						pDropCard();
+					}
+					
+					
+					
+					//currentPlayer = Game.getInstance().getPC();
+				}else {
+					currentPlayer = Game.getInstance().getPlayer();
+				}
+			}
+		});
+		btnEndTurn.setBounds(1785, 170, 97, 25);
+		contentPane.add(btnEndTurn);
 		offPanelCards();
 
 		Game.getInstance().createDeck();
@@ -194,24 +231,24 @@ public class GameWindow extends JFrame {
 	}
 
 	private void createGroupPanel(ArrayList<JPanelBackground> panels, Group group, int slides, boolean duplicate, ArrayList<Integer> previousPositions, ArrayList<Bounds> previousBounds) {
-		if(!duplicate) {
-			JPanel groupPanel = new JPanelBackground();
-			groupPanel.setBorder(null);
-			groupPanel.setVisible(true);
-			groupPanel.setOpaque(false);
-			((JPanelBackground)groupPanel).setGroupCards((ArrayList<JPanelBackground>) panels.clone(), group);
-			((JPanelBackground)groupPanel).setPreviousBounds((ArrayList<Bounds>) previousBounds.clone());
-			((JPanelBackground)groupPanel).setPreviousPositions((ArrayList<Integer>) previousPositions.clone());
-			groupPanel.setBounds(panels.get(0).getX(),panels.get(0).getY(),panels.get(0).getWidth()+(slides*20),panels.get(0).getHeight()+(slides*20));
-			contentPane.add(groupPanel);
-			groupPanel.setLayout(new BorderLayout(0, 0));
-			contentPane.add(groupPanel, 0);
 
+		JPanel groupPanel = new JPanelBackground();
+		groupPanel.setBorder(null);
+		groupPanel.setVisible(true);
+		groupPanel.setOpaque(false);
+		((JPanelBackground)groupPanel).setGroupCards((ArrayList<JPanelBackground>) panels.clone(), group);
+		((JPanelBackground)groupPanel).setPreviousBounds((ArrayList<Bounds>) previousBounds.clone());
+		((JPanelBackground)groupPanel).setPreviousPositions((ArrayList<Integer>) previousPositions.clone());
+		groupPanel.setBounds(panels.get(0).getX(),panels.get(0).getY(),panels.get(0).getWidth()+(slides*20),panels.get(0).getHeight()+(slides*20));
+		contentPane.add(groupPanel);
+		groupPanel.setLayout(new BorderLayout(0, 0));
+		contentPane.add(groupPanel, 0);
 
-			clickToTakeGroupAL(group, previousPositions, previousBounds, groupPanel);
-			groupPanel.addMouseListener(clickToTakeGroup); 
+		group.getGroupPanels().add(groupPanel);
+		((JPanelBackground)groupPanel).setGroupAddress(""+group.getNumber());	
+		clickToTakeGroupAL(group);
+		groupPanel.addMouseListener(clickToTakeGroup); 
 
-		}
 	}
 	/////////////////////////////////////////////////Moving and creating panels for groups
 
@@ -276,7 +313,7 @@ public class GameWindow extends JFrame {
 
 	}
 	//////////////////////////////////////////////////////////////////GeneratePanels
-	
+
 
 	///////////////////////////////////////////////////////////////////////////////Bounds
 	private void fillTablePanelsBounds(int xStart, int commonYUp, int width, int height, int xSpacing, int ySpacing, int panelNumber) {
@@ -313,11 +350,11 @@ public class GameWindow extends JFrame {
 		TimerStop timerPlayer = new TimerStop();
 		timerPlayerCardsAL(timerPlayer,step);
 		timerPlayer.setTimer(new Timer(step, timerPlayerCards));
-		
+
 		TimerStop timerPC = new TimerStop();
 		timerPCCardsAL(timerPC, step);
 		timerPC.setTimer(new Timer(step, timerPCCards));
-		
+
 		timerPlayer.startTimer();
 		Thread.sleep(step/2);
 		timerPC.startTimer();
@@ -350,13 +387,18 @@ public class GameWindow extends JFrame {
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////Deal Cards	
 
-
+	////////////////////////////////////////////////////////////////////////////////////////////////Action Listeners
 	public void generateActionListeners(){
 		dealCardsButton = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int step = 750;
+				playerCard = null;
+				int i = 0;
+				for (JPanel jPanel : playerPanels) {
+					jPanel.setBounds(playerPanelsBounds.get(i).getX(), playerPanelsBounds.get(i).getY(), playerPanelsBounds.get(i).getWidth(), playerPanelsBounds.get(i).getHeight());	
+					i++;
+				}
 				try {
-
 					Game.getInstance().getPlayer().getHand().clear();
 					Game.getInstance().getPC().getHand().clear();
 					Game.getInstance().deal();
@@ -377,157 +419,33 @@ public class GameWindow extends JFrame {
 		clickToGroup = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {//Click to group
-
-				boolean found = false;
-				boolean result = true;
-				int setValue = 0;
-				for (Group group : Game.getInstance().getTable().getGroups()) {
-					for (Set set : group.getMySets()) {
-						for (Card card1 : set.getCards()) {
-							for (Card card2 : setToCreate) {
-								if(card2==card1) {
-									result = false;
-								}
-							}
-
-						}
-					}	
-				}
-				if(result) {
-					for (int i = 0; i < currentPlayer.getHand().size() && !found; i++) {
-						setValue = currentPlayer.getHand().get(i).getNumber();
-						if(Game.getInstance().createGroup(currentPlayer, (ArrayList<Card>) setToCreate.clone(), setValue, currentTurnNumber)) {
-							found = true;
-						}
-					}
-					if(found) {
-						int index = 0;
-						boolean duplicate = false;
-						if(Game.getInstance().getTable().getGroups().size()>1) {
-							Group lastGroup = Game.getInstance().getTable().getGroups().get(Game.getInstance().getTable().getGroups().size()-1);
-							Set lastSet = lastGroup.getMySets().get(0);
-							Game.getInstance().getTable().getGroups().remove(lastGroup);
-
-							for (Group group : Game.getInstance().getTable().getGroups()) {
-								if(group.getNumber()==lastGroup.getNumber()) {
-									duplicate = true;
-									group.getMySets().add(lastSet);
-									index = Game.getInstance().getTable().getGroups().indexOf(group);
-								}
-							}
-							if(!duplicate) {
-								Game.getInstance().getTable().getGroups().add(lastGroup);
-								index = Game.getInstance().getTable().getGroups().size()-1;
-							}
-						}
-						movePanels(Game.getInstance().getTable().getGroups().get(index), duplicate);
-					}else {
-						JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Usted no posee la carta adecuada");
-					}
-				}else {
-					JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Las cartas a usar no pueden pertenecer a otro grupo");
-				}
-				lblCount.setText("0");
-				setToCreate.clear();
+				pFormGroup();
 			}
 		};
-		
+
 		clickDropPanel = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				if(playerCard!=null) {
-					boolean found = false;
-
-
-					for (int i = 0; i < tablePanels.size() && !found ; i++) {
-						if(!tablePanels.get(i).isVisible()) {
-							((JPanelBackground)tablePanels.get(i)).setBackground("Images/"+ playerCard.getAddressName());	
-							tablePanels.get(i).setVisible(true);
-							found = true;
-						}
-					}
-					found = false;
-					for (int i = 0; i < playerPanels.size() && !found; i++) {
-						//setValue = currentPlayer.getHand().get(i).getNumber();
-						if(Game.getInstance().cardByAddress(((JPanelBackground)playerPanels.get(i)).getAddress())==playerCard) {
-							found = true;
-							playerPanels.get(i).setBounds(playerPanelsBounds.get(i).getX(), playerPanelsBounds.get(i).getY(), playerPanelsBounds.get(i).getWidth(), playerPanelsBounds.get(i).getHeight());
-							playerPanels.get(i).setVisible(false);
-							Game.getInstance().playCard(currentPlayer, playerCard);
-						}
-					}
-					playerCard = null;
-				}
+				pDropCard();
 			}
 		};
 
 	}
 
-	public void clickToTakeGroupAL(Group group, ArrayList<Integer> previousPositions,  ArrayList<Bounds> previousBounds, JPanel groupPanel ) {
+	public void clickToTakeGroupAL(Group group) {
 		clickToTakeGroup = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				if(playerCard!=null) {
-					//Collections.sort(perviousPositions);
-					if(!Game.getInstance().takeGroup(currentPlayer, playerCard, group)) {
-						JOptionPane.showMessageDialog(null, "La carta que ha utilizado no es la correcta");	
-					}else {
-						while(!previousPositions.isEmpty()) {
-							int minimunPosition = previousPositions.get(0);
-							int indexBounds = 0;
-							for (Integer index : previousPositions) {
-								if(minimunPosition>index) {
-									minimunPosition = index;
-								}
-								indexBounds++;
-							}
-							JPanel thePanel = ((JPanelBackground)groupPanel).getGroupCards().get(indexBounds-1);
-							Bounds theBounds = previousBounds.get(indexBounds-1);
-							thePanel.setBounds(theBounds.getX(),theBounds.getY(),theBounds.getWidth(),theBounds.getHeight());
-							thePanel.setVisible(false);
-							contentPane.add(thePanel, minimunPosition);
-							previousPositions.remove(Integer.valueOf(minimunPosition));
-							previousBounds.remove(theBounds);
-							((JPanelBackground)groupPanel).getGroupCards().remove(thePanel);
-						}
-
-						playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
-						contentPane.remove(groupPanel);
-						playerCard = null;
-					}
-				}
+				pTakeGroup(group);
 			}
 		};
-
 	}
-	
+
 	public void clickTablePanelsAL(JPanel panel) {
 		clickTablePanels = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				Card aux = Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress());
-				if(playerCard==null) {
-					if(!setToCreate.contains(aux)) {
-						int cardNumber = aux.getNumber();
-						int cardBefore = Integer.valueOf(lblCount.getText());
-						int finalNumber = cardNumber + cardBefore;
-
-						if(finalNumber>14) {
-							JOptionPane.showMessageDialog(null, "El valor del grupo a crear sobrepasa 14");
-						}else {
-							lblCount.setText(Integer.valueOf(finalNumber).toString());
-							setToCreate.add(aux);
-						}
-					}
-				}else {
-					if(Game.getInstance().takeCard(currentPlayer, playerCard, aux)) {
-						panel.setVisible(false);
-						playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
-						playerCard = null;
-					}else {
-						JOptionPane.showMessageDialog(null, "La carta que ha utilizado no es la correcta");
-					}
-				}
+				pSelectTablePanels(panel);
 			}
 		};
 	}
@@ -536,27 +454,81 @@ public class GameWindow extends JFrame {
 		clickPlayerPanels = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				lblCount.setText("0");
-				setToCreate.clear();
-				int i = 0;
-				for (JPanel jPanel : playerPanels) {
-					jPanel.setBounds(playerPanelsBounds.get(i).getX(), playerPanelsBounds.get(i).getY(), playerPanelsBounds.get(i).getWidth(), playerPanelsBounds.get(i).getHeight());	
-					i++;
-				}
-				if(playerCard!=Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress())){
-					playerCard = Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress());
-					panel.setBounds(bound.getX()-10,bound.getY()-10,bound.getWidth(),bound.getHeight());	
+				if(groupToAdd==null) {
+					lblCount.setText("0");
+					setToCreate.clear();
+					int i = 0;
+					for (JPanel jPanel : playerPanels) {
+						jPanel.setBounds(playerPanelsBounds.get(i).getX(), playerPanelsBounds.get(i).getY(), playerPanelsBounds.get(i).getWidth(), playerPanelsBounds.get(i).getHeight());	
+						i++;
+					}
+					if(playerCard!=Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress())){
+						playerCard = Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress());
+						panel.setBounds(bound.getX()-10,bound.getY()-10,bound.getWidth(),bound.getHeight());	
+					}else {
+						playerCard = null;
+					}
 				}else {
-					playerCard = null;
+					playerCard = Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress());
+
+					if(Game.getInstance().changeGroup(currentPlayer, groupToAdd, playerCard, currentTurnNumber)) {
+						
+						JPanel groupPanel = groupToAdd.getGroupPanels().get(0);
+						
+						
+						groupPanel.setBounds((int)groupPanel.getBounds().getX(),(int)groupPanel.getBounds().getY(),(int)groupPanel.getBounds().getWidth()+20,(int)groupPanel.getBounds().getHeight()+20);
+						int panelNumber = groupToAdd.getMySets().get(0).getCards().size();
+						int xPosition = (int)groupPanel.getBounds().getX()+15*(panelNumber-1);
+						int yPosition = (int)groupPanel.getBounds().getY()+15*(panelNumber-1);
+						int originalPosition = 0;
+						panel.setVisible(false);
+						
+						JPanel newPanel = null;
+						for (JPanel jPanel : tablePanels) {
+							
+							if(!jPanel.isVisible()) {
+								((JPanelBackground)groupPanel).getPreviousBounds().add(new Bounds((int)jPanel.getBounds().getX(),(int)jPanel.getBounds().getY(),(int)jPanel.getBounds().getWidth(),(int)jPanel.getBounds().getHeight()));
+								newPanel = jPanel;
+								
+								break;
+							}
+							originalPosition++;
+						}
+	
+						((JPanelBackground)groupPanel).getPreviousPositions().add(originalPosition);
+						newPanel.setBounds(xPosition, yPosition, (int)newPanel.getBounds().getWidth(), (int)newPanel.getBounds().getHeight());
+						newPanel.setOpaque(true);
+						newPanel.setVisible(true);
+						((JPanelBackground)newPanel).setBackground("Images/"+playerCard.getAddressName());
+						contentPane.remove(newPanel);
+						contentPane.add(newPanel,0);
+						contentPane.remove(groupPanel);
+						contentPane.add(groupPanel,0);
+						((JPanelBackground)groupPanel).getGroupCards().add((JPanelBackground) newPanel);
+						clickToTakeGroupAL(groupToAdd);
+						groupPanel.addMouseListener(clickToTakeGroup); 
+						for (Card card : groupToAdd.getMySets().get(0).getCards()) {
+							JPanel panel = tablePanelByAddress("Images/"+card.getAddressName());
+							panel.setBounds((int)panel.getBounds().getX()+10,(int)panel.getBounds().getY()+10,(int)panel.getBounds().getWidth(),(int)panel.getBounds().getHeight());
+						}
+						groupToAdd = null;
+						playerCard = null;
+						lblCount.setText("0");
+						
+						
+						
+					}else {
+						JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Usted no posee la carta adecuada");
+					}
 				}
 			}
 		};
 	}
-	
+
 	public void timerPCCardsAL(TimerStop timerPC, int step) {
 		timerPCCards = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setCardInPanel(1, timerPC.getRepetitions());
+				setCardInPanel(3, timerPC.getRepetitions());
 				PCPanels.get(timerPC.getRepetitions()).setVisible(true);
 				timerPC.incrementRepetitions();
 				if(timerPC.getRepetitions()==4) {
@@ -564,7 +536,6 @@ public class GameWindow extends JFrame {
 				}
 			}
 		};
-		
 	}
 
 	public void timerPlayerCardsAL(TimerStop timerPlayer, int step) {
@@ -591,7 +562,7 @@ public class GameWindow extends JFrame {
 			}
 		};
 	}
-	
+
 	public void timerTableCards(TimerStop timerTable, int step) {
 		timerTableCards = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -605,6 +576,235 @@ public class GameWindow extends JFrame {
 			}
 		};
 	}
+	////////////////////////////////////////////////////////////////////Action Listeners
+
+
+	/////////////////////////////////////////////////////////////////////////Player Functions 
+	public void pFormGroup() {
+		boolean found = false;
+		int setValue = 0;
+		if(!couple) {
+			for (int i = 0; i < currentPlayer.getHand().size() && !found; i++) {
+				setValue = currentPlayer.getHand().get(i).getNumber();
+				if(Game.getInstance().createGroup(currentPlayer, (ArrayList<Card>) setToCreate.clone(), setValue, currentTurnNumber)) {
+					found = true;
+				}
+			}
+			if(found) {
+				int index = 0;
+				boolean duplicate = false;
+				if(Game.getInstance().getTable().getGroups().size()>1) {
+					Group lastGroup = Game.getInstance().getTable().getGroups().get(Game.getInstance().getTable().getGroups().size()-1);
+					Set lastSet = lastGroup.getMySets().get(0);
+					Game.getInstance().getTable().getGroups().remove(lastGroup);
+
+					for (Group group : Game.getInstance().getTable().getGroups()) {
+						if(group.getNumber()==lastGroup.getNumber()) {
+							duplicate = true;
+							group.getMySets().add(lastSet);
+							index = Game.getInstance().getTable().getGroups().indexOf(group);
+						}
+					}
+					if(!duplicate) {
+						Game.getInstance().getTable().getGroups().add(lastGroup);
+						index = Game.getInstance().getTable().getGroups().size()-1;
+					}
+				}
+				movePanels(Game.getInstance().getTable().getGroups().get(index), duplicate);
+			}else {
+				JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Usted no posee la carta adecuada");
+			}
+		}else {
+			ArrayList<Set> sets = new ArrayList<Set>();
+			for (Card card : setToCreate) {
+				ArrayList<Card> cards = new ArrayList<Card>();
+				cards.add(card);
+				Set set = new Set(cards, card.getNumber());
+				sets.add(set);
+			}
+			Group group = new Group(currentPlayer, sets, sets.get(0).getNumber(), currentTurnNumber);
+			Game.getInstance().getTable().getGroups().add(group);
+			movePanels(group, false);
+			couple = false;
+			lblCount.setFont(new Font("Tahoma", Font.BOLD, 28));
+		}
+		lblCount.setText("0");
+		setToCreate.clear();
+	}
+
+	public void pDropCard() {
+		if(playerCard!=null) {
+			boolean found = false;
+
+
+			for (int i = 0; i < tablePanels.size() && !found ; i++) {
+				if(!tablePanels.get(i).isVisible()) {
+					((JPanelBackground)tablePanels.get(i)).setBackground("Images/"+ playerCard.getAddressName());	
+					tablePanels.get(i).setVisible(true);
+					found = true;
+				}
+			}
+			found = false;
+			ArrayList<JPanel> panels = (currentPlayer instanceof HumanPlayer) ? playerPanels : PCPanels;
+			ArrayList<Bounds> bounds = (currentPlayer instanceof HumanPlayer) ? playerPanelsBounds : PCPanelsBounds;
+			for (int i = 0; i < playerPanels.size() && !found; i++) {
+				
+				if(Game.getInstance().cardByAddress(((JPanelBackground)panels.get(i)).getAddress())==playerCard) {
+					found = true;
+					panels.get(i).setBounds(bounds.get(i).getX(), bounds.get(i).getY(), bounds.get(i).getWidth(), bounds.get(i).getHeight());
+					panels.get(i).setVisible(false);
+					Game.getInstance().playCard(currentPlayer, playerCard);
+				}
+			}
+			playerCard = null;
+		}	
+	}
+
+	public void pTakeGroup(Group group) {
+		if(playerCard!=null) {
+			if(!Game.getInstance().takeGroup(currentPlayer, playerCard, group)) {
+				JOptionPane.showMessageDialog(null, "La carta que ha utilizado no es la correcta para tomar el grupo");	
+			}else {
+				for (JPanel panel : group.getGroupPanels()) {
+					while(!((JPanelBackground) panel).getPreviousPositions().isEmpty()) {
+						int minimunPosition = ((JPanelBackground)panel).getPreviousPositions().get(0);
+						int indexBounds = 0;
+						for (Integer index : ((JPanelBackground)panel).getPreviousPositions()) {
+							if(minimunPosition>index) {
+								minimunPosition = index;
+							}
+							indexBounds++;
+						}
+						JPanel thePanel = ((JPanelBackground)panel).getGroupCards().get(indexBounds-1);
+						Bounds theBounds = ((JPanelBackground)panel).getPreviousBounds().get(indexBounds-1);
+						thePanel.setBounds(theBounds.getX(),theBounds.getY(),theBounds.getWidth(),theBounds.getHeight());
+						thePanel.setVisible(false);
+						contentPane.add(thePanel, minimunPosition);
+						((JPanelBackground)panel).getPreviousPositions().remove(Integer.valueOf(minimunPosition));
+						((JPanelBackground)panel).getPreviousBounds().remove(theBounds);
+						((JPanelBackground)panel).getGroupCards().remove(thePanel);
+					}
+
+					//if(playerPanelByAddress("Images/"+playerCard.getAddressName())!=null) 
+
+
+					contentPane.remove(panel);
+
+				}
+				playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
+				playerCard = null;
+			}
+
+		}else {
+			if(group.getMySets().size()==1) {
+				setToCreate.clear();
+				if(!singleGroupSelected) {
+					for (Card card : group.getMySets().get(0).getCards()) {
+						JPanel panel = tablePanelByAddress("Images/"+card.getAddressName());
+						panel.setBounds((int)panel.getBounds().getX()-10,(int)panel.getBounds().getY()-10,(int)panel.getBounds().getWidth(),(int)panel.getBounds().getHeight());
+					}
+					lblCount.setText(""+group.getNumber());
+					singleGroupSelected = true;
+					groupToAdd = group;
+
+				}else {
+					for (Card card : group.getMySets().get(0).getCards()) {
+						JPanel panel = tablePanelByAddress("Images/"+card.getAddressName());
+						panel.setBounds((int)panel.getBounds().getX()+10,(int)panel.getBounds().getY()+10,(int)panel.getBounds().getWidth(),(int)panel.getBounds().getHeight());
+					}
+					lblCount.setText("0");
+					singleGroupSelected = false;
+					groupToAdd = null;
+				}
+			}
+		}
+	}
+
+	public void pSelectTablePanels(JPanel panel) {
+		Card aux = Game.getInstance().cardByAddress(((JPanelBackground)panel).getAddress());
+		if(playerCard==null) {
+			if(!setToCreate.contains(aux)) {
+				int cardNumber = aux.getNumber();
+				int cardBefore = Integer.valueOf(lblCount.getText());
+				int finalNumber = cardNumber + cardBefore;
+				int option = 3;
+				int number = -1; 
+
+				if(cardBefore!=0) {
+					//option = 0: decide pair or add
+					//option = 1: cant pair neither add
+					//option = 2: just pair
+					//option = 3: just add
+
+					if(finalNumber<=14) {
+						if(cardNumber==cardBefore) {
+							number = 0; 
+							if(!lblCount.getFont().isItalic()) {
+								while(number != cardBefore && number != finalNumber ) {
+									try {
+										number = Integer.valueOf(JOptionPane.showInputDialog("¿Desea que el valor sea: "+cardNumber +" o "+finalNumber+"?" ));
+										if(number == cardBefore) {
+											couple = true;
+										}
+										option = 0;
+									} catch (NumberFormatException e) {
+									}
+								}
+							}
+						}else {
+							option = 3;
+						}
+					}else {
+						if(cardNumber==cardBefore) {
+							option = 2;
+							couple = true;
+						}else {
+							option = 1;
+						}
+					}
+
+					if(couple) {
+						lblCount.setFont(new Font("Tahoma", Font.ITALIC, 32));
+					}else {
+						lblCount.setFont(new Font("Tahoma", Font.BOLD, 28));
+					}
+				}
+
+				switch (option) {
+				case 0:
+					lblCount.setText(Integer.valueOf(number).toString());
+					setToCreate.add(aux);
+					break;
+				case 1:
+					JOptionPane.showMessageDialog(null, "El valor del grupo a crear sobrepasa 14");
+					break;
+				case 2:
+					setToCreate.add(aux);
+					lblCount.setText(Integer.valueOf(cardBefore).toString());
+					break;	
+				case 3:
+					setToCreate.add(aux);
+					lblCount.setText(Integer.valueOf(finalNumber).toString());
+					break;	
+				}
+			}
+		}else {
+			if(Game.getInstance().takeCard(currentPlayer, playerCard, aux)) {
+				panel.setVisible(false);
+				if(currentPlayer instanceof HumanPlayer) {
+				playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
+				}else {
+					PCPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
+				}
+				playerCard = null;
+			}else {
+				JOptionPane.showMessageDialog(null, "La carta que ha utilizado no es la correcta");
+			}
+		}
+	}
+	
+
+	////////////////////////////////////////////////////////////////////////////////Player Functions 
 
 	///////////////////////////////////////////////////////////////////////////////Misc functions
 	public JPanel tablePanelByAddress(String address) {
@@ -633,6 +833,19 @@ public class GameWindow extends JFrame {
 		}
 		return aux;
 	}
+	private JPanel PCPanelByAddress(String address) {
+		JPanel aux = null;
+		boolean found = false;
+		int i = 0;
+		while(i < PCPanels.size()&&!found) {
+			if(((JPanelBackground)PCPanels.get(i)).getAddress().equalsIgnoreCase(address)) {
+				found = true;
+				aux = PCPanels.get(i);
+			}
+			i++;
+		}
+		return aux;
+	}
 
 	public void offPanelCards() {
 		for (int i = 0; i < 4; i++) {
@@ -644,8 +857,4 @@ public class GameWindow extends JFrame {
 	public Icon iconFromAddress(String address) throws IOException {
 		return new ImageIcon(ImageIO.read(new File("Images/"+address)));
 	}
-	///////////////////////////////////////////////////////////////////////////////////////////Misc functions
-
-
-
 }
