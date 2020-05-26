@@ -57,7 +57,7 @@ public class Card {
 	}
 	
 	public String toString() {
-		return number+" "+value;
+		return number+" "+suit+" "+value;
 	}
 
 

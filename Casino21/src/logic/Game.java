@@ -18,6 +18,10 @@ public class Game {
 		this.player = new HumanPlayer("Human");
 		this.PC = new PCPlayer();
 		this.table = new Table();
+		
+		createDeck();
+		shuffleDeck();
+		onTable();
 	}
 
 	public static Game getInstance() {
@@ -113,7 +117,7 @@ public class Game {
 
 	}
 
-	public void onTable() {
+	private void onTable() {
 		try {
 			for (int i = 0; i < 4; i++) {
 				table.addCard(takeCard());
@@ -173,6 +177,26 @@ public class Game {
 			sets.add(auxS);
 			Group auxG = new Group(player, (ArrayList<Set>) sets.clone(), number, turnNumber);
 			table.getGroups().add(auxG);
+		}
+		return result;
+	}
+	
+	public boolean tryCreateGroup(Player player, Card cardP, ArrayList<Card> cards, int number, int turnNumber) {
+		boolean result = false;
+		cards.add(cardP);
+		int value = 0;
+		for (Card card : cards) {
+			value += card.getNumber(); 
+		}
+		if(value == number) {
+			result = true;
+			Set auxS = new Set((ArrayList<Card>) cards.clone(), number);
+			table.getCards().removeAll(cards);
+			ArrayList<Set> sets = new ArrayList<Set>();
+			sets.add(auxS);
+			Group auxG = new Group(player, sets, number, turnNumber);
+			table.getGroups().add(auxG);
+			player.playCard(cardP);
 		}
 		return result;
 	}

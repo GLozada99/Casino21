@@ -22,7 +22,7 @@ public class Set {
 	public void setNumber(int number) {
 		this.number = number;
 	}
-	
+
 	public float getSetValue() {
 		float value = 0;
 		for (Card card : cards) {
@@ -31,4 +31,18 @@ public class Set {
 		return value;
 	}
 	
+	public boolean coupleWorth() {
+		boolean result = true;
+		if(cards.size()!=1) {
+			int number = cards.get(0).getNumber();
+			for (Card card : cards) {
+				if(number != card.getNumber()) {
+					result = false;
+				}
+			}
+		}else {
+			result = false;
+		}
+		return result;
+	}
 }

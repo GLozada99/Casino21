@@ -1,11 +1,24 @@
 package logic;
 
+import java.util.ArrayList;
+
 public class Main {
 
 	public static void main(String[] args) {
 
 		
-		
+		//Game.getInstance().onTable();
+		/*for (Card card : Game.getInstance().getTable().getCards()) {
+			System.out.println(card.toString());
+		}*/
+		int i=1;
+		for (Set sets : Game.getInstance().getTable().allGroupsAviable()) {
+			System.out.print(i+"__ ");
+			for (Card card : sets.getCards()) {
+				System.out.println(card.toString());
+			}
+			i++;
+		}
 		/*g1.deal();
 		g1.deal();
 		g1.deal();
