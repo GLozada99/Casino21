@@ -39,8 +39,7 @@ public class Table {
 		cards.remove(cards.indexOf(card));
 	}
 	public ArrayList<logic.Set> allGroupsAviable(){
-		List theCards = cards;
-
+		List<Card> theCards = cards;
 		Set<Card> theSet = new HashSet<Card>(theCards);
 		Set<Set<Card>>theSets = Sets.powerSet(theSet);
 		ArrayList<logic.Set> retSets = new ArrayList<logic.Set>();
@@ -61,7 +60,16 @@ public class Table {
 				}
 			}
 		}
+		int i = 1;
+		for (logic.Set set : retSets) {
+			System.out.println(i+"         "+set.getNumber());
+			for (Card card : set.getCards()) {
+				System.out.println("	"+card.toString());
+			}
+			i++;
+		}
 		
+		System.out.println("\n\n\n");
 		return retSets;
 	}
 }

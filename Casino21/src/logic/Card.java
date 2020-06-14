@@ -1,6 +1,6 @@
 package logic;
 
-public class Card {
+public class Card implements Cloneable{
 	private final int number;
 	private final String suit;
 	private float value;
@@ -58,6 +58,17 @@ public class Card {
 	
 	public String toString() {
 		return number+" "+suit+" "+value;
+	}
+	
+	public Object clone() {
+
+	    try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 

@@ -9,6 +9,7 @@ public class Game {
 	private Player player;
 	private Player PC;
 	private Table table;
+	private Player lastPlayerTaken;
 	private static Game game = null;
 
 	private Game() {
@@ -169,7 +170,7 @@ public class Game {
 		for (Card card : cards) {
 			value += card.getNumber(); 
 		}
-		if(value == number || (value==14 && number==1)) {
+		if(value == number || (value==14 && number==1) || player instanceof PCPlayer/*|| value%number==0*/) {
 			result = true;
 			Set auxS = new Set((ArrayList<Card>) cards.clone(), number);
 			table.getCards().removeAll(cards);
@@ -250,6 +251,7 @@ public class Game {
 			table.removeCard(cardT);
 			result = true;
 		}
+		setLastPlayerTaken(player);
 		return result;
 	}
 	public void playCard(Player player, Card cardP) {
@@ -270,6 +272,7 @@ public class Game {
 			table.getGroups().remove(table.getGroups().indexOf(group));
 			result = true;
 		}
+		setLastPlayerTaken(player);
 		return result;
 	}
 
@@ -295,7 +298,30 @@ public class Game {
 		}
 		return aux;
 	}
+
+	public Player getLastPlayerTaken() {
+		return lastPlayerTaken;
+	}
+
+	public void setLastPlayerTaken(Player lastPlayerTaken) {
+		this.lastPlayerTaken = lastPlayerTaken;
+	}
 	
+	public static int univCoupleWorth(ArrayList<Card> cards) {
+		boolean result = true;
+		int auxNumb = cards.get(0).getNumber();
+		if(cards.size()!=1) {
+			
+			for (Card card : cards) {
+				if(auxNumb != card.getNumber()) {
+					result = false;
+				}
+			}
+		}else {
+			result = false;
+		}
+		return auxNumb;
+	}
 	
 
 

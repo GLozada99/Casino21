@@ -2,7 +2,7 @@ package logic;
 
 import java.util.ArrayList;
 
-public class Set {
+public class Set implements Comparable{
 	private ArrayList<Card> cards;
 	private int number;
 	public Set(ArrayList<Card> cards, int number) {
@@ -33,16 +33,37 @@ public class Set {
 	
 	public boolean coupleWorth() {
 		boolean result = true;
+		int auxNumb = cards.get(0).getNumber();
 		if(cards.size()!=1) {
-			int number = cards.get(0).getNumber();
+			
 			for (Card card : cards) {
-				if(number != card.getNumber()) {
+				if(auxNumb != card.getNumber()) {
 					result = false;
 				}
 			}
 		}else {
 			result = false;
 		}
+		if(result==true) {
+			this.number = auxNumb;
+			System.out.println("");
+		}
 		return result;
 	}
+	@Override
+	public int compareTo(Object setComp) {//Para sortear los sets por numero
+		int compareNumber = ((Set) setComp).getNumber();
+		
+		return this.number-compareNumber;
+	}
+	
+	
+	
+	
+	
+	/*public int compareTo(Object o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}*/
+	
 }

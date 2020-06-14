@@ -66,7 +66,7 @@ public class GameWindow extends JFrame {
 	private ActionListener timerPCCards = null;
 	private ActionListener timerTableCards = null;
 	private ActionListener dealCardsButton = null;
-
+	private ActionListener endOfTurn = null;
 
 
 
@@ -89,9 +89,13 @@ public class GameWindow extends JFrame {
 	private Player currentPlayer;
 	private int currentTurnNumber = 0;
 	private Card playerCard = null;
+	private Card formerPlayerCard = null;
 	private boolean singleGroupSelected = false;
 	private Group groupToAdd = null;
 	private int groupIndexPC = 0;
+	//private JPanel pnlFormerPCCard = null;
+	private ArrayList<JPanel> lastMovePanels = new ArrayList<JPanel>();
+	private JButton btnEndTurn = null;
 
 
 
@@ -126,6 +130,7 @@ public class GameWindow extends JFrame {
 		//fillTablePanelsBounds(xStart, commonYUp, width, height, xSpacing, ySpacing, panelNumber);
 		fillTablePanelsBounds(517, 333, 95, 145, 153, 50, 6);
 		fillPlayersPanelsBounds(714, 75, 100, 140, 120, 550, 4);
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1900, 1040);
 		setLocationRelativeTo(null);
@@ -174,43 +179,12 @@ public class GameWindow extends JFrame {
 		btnReset.setBounds(1785, 51, 97, 25);
 		contentPane.add(btnReset);
 
-		JButton btnEndTurn = new JButton("End Turn");
-		btnEndTurn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(currentPlayer instanceof HumanPlayer) {
-					currentPlayer = Game.getInstance().getPC();
-					Set set = ((PCPlayer)Game.getInstance().getPC()).evaluateBestPlay(Game.getInstance().getTable());
-
-					if(set!=null) {
-						playerCard = set.getCards().get(set.getCards().size()-1);
-						if(set.getCards().size()>2) {
-							int i = 0;
-							for (int j = 0; j < set.getCards().size()-1; j++) {
-								setToCreate.add(set.getCards().get(i));
-								i++;
-							}
-							pFormGroup();
-							Group auxGroup = Game.getInstance().getTable().getGroups().get(groupIndexPC);
-							pTakeGroup(auxGroup);
-							
-						}else {
-							JPanel tableCard = tablePanelByAddress("Images/"+set.getCards().get(0).getAddressName());
-							pSelectTablePanels(tableCard);
-						}
-					}else {
-						playerCard = currentPlayer.getHand().get(0);
-						pDropCard();
-					}
-
-					currentPlayer = Game.getInstance().getPlayer();
-
-					//currentPlayer = Game.getInstance().getPC();
-				}
-			}
-		});
+		btnEndTurn = new JButton("End Turn");
+		btnEndTurn.addActionListener(endOfTurn);
 		btnEndTurn.setBounds(1785, 170, 97, 25);
+		btnEndTurn.setEnabled(false);
 		contentPane.add(btnEndTurn);
-		offPanelCards();
+		//	offPanelCards();
 
 		/*	Game.getInstance().createDeck();
 		Game.getInstance().shuffleDeck();
@@ -310,6 +284,18 @@ public class GameWindow extends JFrame {
 			panel.setLayout(new BorderLayout(0, 0));
 			PCPanels.add(panel);
 		}
+		for (int i = 0; i < 8; i++) {
+			JPanel pnlFormerPCCard = new JPanelBackground();
+			pnlFormerPCCard.setBorder(null);
+			pnlFormerPCCard.setVisible(false);
+			pnlFormerPCCard.setOpaque(false);
+			pnlFormerPCCard.setBounds(PCPanelsBounds.get(0).getX()-600 + 20*i,PCPanelsBounds.get(0).getY()+ 20*i,PCPanelsBounds.get(0).getWidth(),PCPanelsBounds.get(0).getHeight());
+			contentPane.add(pnlFormerPCCard);
+			pnlFormerPCCard.setLayout(new BorderLayout(0, 0));
+			lastMovePanels.add(pnlFormerPCCard);
+		}
+
+
 	}
 
 	public void generateDropPanel() {
@@ -399,7 +385,88 @@ public class GameWindow extends JFrame {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////Deal Cards	
 
 	////////////////////////////////////////////////////////////////////////////////////////////////Action Listeners
+	public void btnEndTurnAL() {
+
+	}
+
 	public void generateActionListeners(){
+		endOfTurn  = new ActionListener() {
+			private int setNumber;
+
+			public void actionPerformed(ActionEvent arg0) {
+				if(currentPlayer instanceof HumanPlayer) {
+					
+					for (JPanel jPanel : lastMovePanels) {
+						jPanel.setVisible(false);
+					}
+					ArrayList<Card> auxCards = new ArrayList<Card>();
+					currentPlayer = Game.getInstance().getPC();
+
+					Set set = ((PCPlayer)Game.getInstance().getPC()).evaluateBestPlay(Game.getInstance().getTable());
+
+					if(set!=null) {
+						float value = 0;
+						for (Card card : currentPlayer.getHand()) {
+							if((card.getNumber()==set.getNumber()||((card.getNumber()==1)&&(set.getNumber()==14)))&&value<card.getValue()) {
+								playerCard = card;
+								value = card.getValue();
+
+							}
+						}
+
+						for (Card card : set.getCards()) {
+							auxCards.add(card);
+						}
+						formerPlayerCard = (Card) playerCard.clone();
+
+						if(set.getCards().size()>1) {
+							int i = 0;
+							for (int j = 0; j < set.getCards().size(); j++) {
+								setToCreate.add(set.getCards().get(i));
+								
+								i++;
+							}
+							setNumber = set.getNumber();
+							pFormGroup();
+							Group auxGroup = Game.getInstance().getTable().getGroups().get(groupIndexPC);
+							pTakeGroup(auxGroup);
+						}else {
+							JPanel tableCard = tablePanelByAddress("Images/"+set.getCards().get(0).getAddressName());
+							pSelectTablePanels(tableCard);
+						}
+					}else {
+						playerCard = currentPlayer.getHand().get(0);
+						formerPlayerCard = (Card) playerCard.clone();
+						pDropCard();
+					}
+					auxCards.add(0,formerPlayerCard);
+
+					int i = 0;
+					for (Card card : auxCards) {
+						lastMovePanels.get(i).setOpaque(true);
+						lastMovePanels.get(i).setVisible(true);
+						((JPanelBackground)lastMovePanels.get(i)).setBackground("Images/"+card.getAddressName());		
+						i++;
+					}
+
+					currentPlayer = Game.getInstance().getPlayer();
+					if(Game.getInstance().getPC().getHand().size()==0)
+						btnEndTurn.setEnabled(false);
+
+					if(Game.getInstance().getPC().getHand().size()==0 && Game.getInstance().getPlayer().getHand().size()==0 && Game.getInstance().getDeck().size()==0) {
+						for (JPanel jPanel : tablePanels) {
+							if(jPanel.isVisible()) {
+								jPanel.setVisible(false);
+								String auxAddress = ((JPanelBackground)jPanel).getAddress();
+								Card auxCard = Game.getInstance().cardByAddress(auxAddress);
+								Game.getInstance().getLastPlayerTaken().getHeap().add(auxCard);
+							}
+						}
+
+					}
+				}
+			}
+		};
 		dealCardsButton = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int step = 750;
@@ -425,6 +492,7 @@ public class GameWindow extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				btnEndTurn.setEnabled(true);
 			}
 		};
 		clickToGroup = new MouseAdapter() {
@@ -529,7 +597,7 @@ public class GameWindow extends JFrame {
 
 
 					}else {
-						JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Usted no posee la carta adecuada");
+						JOptionPane.showMessageDialog(null, "Es esto? El grupo no puede ser creado. Usted no posee la carta adecuada");
 					}
 				}
 			}
@@ -594,9 +662,22 @@ public class GameWindow extends JFrame {
 	public void pFormGroup() {
 		boolean found = false;
 		int setValue = 0;
+	//	ArrayList<Integer> handCards = new ArrayList<Integer>();
+		
+		//for (Card card : currentPlayer.getHand()) {
+			//handCards.add(card.getNumber());
+		//}
+		
 		if(!couple) {
+			if(currentPlayer instanceof HumanPlayer) {
 			for (int i = 0; i < currentPlayer.getHand().size() && !found; i++) {
 				setValue = currentPlayer.getHand().get(i).getNumber();
+				if(Game.getInstance().createGroup(currentPlayer, (ArrayList<Card>) setToCreate.clone(), setValue, currentTurnNumber)) {
+					found = true;
+				}
+			}
+			}else {
+				setValue = formerPlayerCard.getNumber();
 				if(Game.getInstance().createGroup(currentPlayer, (ArrayList<Card>) setToCreate.clone(), setValue, currentTurnNumber)) {
 					found = true;
 				}
@@ -624,6 +705,7 @@ public class GameWindow extends JFrame {
 				}
 				movePanels(Game.getInstance().getTable().getGroups().get(index), duplicate);
 			}else {
+
 				JOptionPane.showMessageDialog(null, "El grupo no puede ser creado. Usted no posee la carta adecuada");
 			}
 		}else {
@@ -675,6 +757,12 @@ public class GameWindow extends JFrame {
 	public void pTakeGroup(Group group) {
 		if(playerCard!=null) {
 			if(!Game.getInstance().takeGroup(currentPlayer, playerCard, group)) {
+				for (Set set : group.getMySets()) {
+					for (Card card : set.getCards()) {
+						System.out.println("------>"+card.toString());
+					}
+				}
+				System.out.println("Numero:"+group.getNumber());
 				JOptionPane.showMessageDialog(null, "La carta que ha utilizado no es la correcta para tomar el grupo");	
 			}else {
 				for (JPanel panel : group.getGroupPanels()) {
@@ -701,10 +789,9 @@ public class GameWindow extends JFrame {
 
 
 					contentPane.remove(panel);
-
 				}
 				if(currentPlayer instanceof HumanPlayer) {
-				playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
+					playerPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
 				}else {
 					PCPanelByAddress("Images/"+playerCard.getAddressName()).setVisible(false);
 				}
